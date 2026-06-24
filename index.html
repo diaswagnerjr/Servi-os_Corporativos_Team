@@ -1,12 +1,54 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Servicos Corporativos Team OS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servicos Corporativos Team OS</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0f172a;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh}aside{background:#0f1f38;color:#e5edf8;padding:24px;display:flex;flex-direction:column;gap:10px}.brand{font-weight:800;font-size:1.2rem;margin-bottom:14px}.brand span{display:block;color:#94a3b8;font-size:.86rem;font-weight:500}button,input,select,textarea{font:inherit}button{border:0;border-radius:6px;background:#1d4ed8;color:white;padding:10px 13px;cursor:pointer}aside button{background:transparent;text-align:left;color:#cbd5e1}button.active{background:#dbeafe;color:#1e3a8a}aside small{margin-top:auto;color:#94a3b8}main{padding:28px}header{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}header p{margin:0;color:#64748b;font-weight:700;text-transform:uppercase;font-size:.8rem}h1{margin:4px 0 0;font-size:1.8rem}h2{font-size:1rem;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.metric,.panel{background:white;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 12px 28px rgba(15,23,42,.06);padding:16px}.metric span{display:block;color:#64748b}.metric b{font-size:1.8rem}.wide{grid-column:span 2}.full{grid-column:1/-1}.bar{display:grid;grid-template-columns:minmax(130px,1fr) 2fr 95px;gap:10px;align-items:center;margin:8px 0}.bar span{font-size:.86rem}.bar div{height:12px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:#1d4ed8}.bar b{text-align:right;font-size:.82rem}.alert{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin:8px 0}.alert b,.alert span{display:block}.alert b{color:#9f1239;text-transform:uppercase;font-size:.75rem}.actions{display:flex;gap:10px;margin-bottom:12px}.table{overflow:auto;background:white;border:1px solid #e2e8f0;border-radius:8px}table{border-collapse:collapse;min-width:980px;width:100%}th,td{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left}th{background:#f8fafc;color:#475569;font-size:.75rem;text-transform:uppercase}td input,input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:6px;padding:8px;color:#0f172a;background:white}textarea{min-height:120px}.heat{overflow:auto}.heat-row{display:grid;grid-template-columns:190px repeat(11,72px);gap:6px;align-items:center;margin-bottom:6px}.heat input{min-width:64px;background:#ecfeff}.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;border-radius:8px;padding:10px 12px;margin-bottom:14px}@media(max-width:960px){.shell{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.wide,.full{grid-column:auto}header{flex-direction:column;align-items:flex-start}.bar{grid-template-columns:1fr}.heat-row{grid-template-columns:1fr repeat(3,72px)}}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    const skills=["Negociacao","Gestao de Fornecedores","Strategic Sourcing","Ferramentas e idiomas","Mercado e categoria","Flexibilidade","Comunicacao","Autonomia","Organizacao","Risco e decisao","Trabalho em equipe"];
+    const people=[
+      {id:"bruna",nome:"Bruna Ferreira",cargo:"Analista Pleno",cadeira:"Marketing services e beneficios",sommos:"Dentro do esperado",nota:3.5},
+      {id:"pedro",nome:"Pedro Henrique",cargo:"Analista Pleno",cadeira:"Transportes e taxi",sommos:"Em desenvolvimento",nota:3.1},
+      {id:"joao",nome:"Joao Victor",cargo:"Analista Senior",cadeira:"Frota, locacao e CFTV",sommos:"Acima do esperado",nota:4.1},
+      {id:"gabriel",nome:"Gabriel Menezes",cargo:"Consultor",cadeira:"Alimentacao e gestao",sommos:"Dentro do esperado",nota:3.8},
+      {id:"thais",nome:"Thais Gois",cargo:"Consultor",cadeira:"Limpeza, jardinagem e pragas",sommos:"Referencia",nota:4.6},
+      {id:"tbd",nome:"TBD",cargo:"Analista Senior",cadeira:"Viagens, cafe e documentos",sommos:"Abaixo do esperado",nota:1.8}
+    ];
+    let tab="dashboard";
+    let selected="bruna";
+    let wallets=[
+      {id:"cafe",categoria:"CAFE E SNACKS",pessoa:"TBD",tipo:"Rotina",spend:5997313,afs:18,forn:38,obs:"Projeto de Agua Filtrada"},
+      {id:"alim",categoria:"FORNECIM ALIM-INDL",pessoa:"Gabriel",tipo:"Rotina",spend:93991539,afs:14,forn:32,obs:"Cachoeiro"},
+      {id:"frota",categoria:"FROTA LEVE",pessoa:"Joao",tipo:"Critica",spend:113446597,afs:2,forn:11,obs:"Reajuste 2027"},
+      {id:"prop",categoria:"SERV AGENC PROPAGAND",pessoa:"Bruna",tipo:"Projeto",spend:82913322,afs:23,forn:28,obs:"Zerar reajuste de BIDS"},
+      {id:"viagem",categoria:"SERV AGENCIAM VIAGEM",pessoa:"TBD",tipo:"Critica",spend:60896289,afs:5,forn:45,obs:"Negociacao Accor"},
+      {id:"cartao",categoria:"SERV CARTAO BENEFIC",pessoa:"Bruna",tipo:"Rotina",spend:142230757,afs:2,forn:5,obs:""},
+      {id:"pragas",categoria:"SERV CONTROLE PRAGAS",pessoa:"Thais",tipo:"Rotina",spend:1745270,afs:8,forn:19,obs:"Zerar reajuste"},
+      {id:"loc",categoria:"SERV LOC IMOVEL",pessoa:"Joao",tipo:"Critica",spend:57714823,afs:21,forn:33,obs:""},
+      {id:"limpeza",categoria:"SERV LIMPEZA/VIGILANCIA",pessoa:"Thais",tipo:"Critica",spend:155173138,afs:60,forn:68,obs:"Categoria concentrada"},
+      {id:"taxi",categoria:"SERV TAXI",pessoa:"Pedro",tipo:"Rotina",spend:35120000,afs:24,forn:21,obs:""}
+    ];
+    let assessments=people.flatMap((p,pi)=>skills.map((s,si)=>({pessoa:p.id,skill:s,esperado:p.id==="tbd"?4:p.cargo.includes("Consultor")?4.3:p.cargo.includes("Senior")?4:3,atual:p.id==="tbd"?0:Math.max(1,Math.min(5,(p.cargo.includes("Consultor")?3.6:2.8)+((pi+si)%4)*.25))})));
+    const money=v=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",notation:"compact",maximumFractionDigits:1}).format(v);
+    function aggregate(){return Object.values(wallets.reduce((a,w)=>{a[w.pessoa]??={pessoa:w.pessoa,spend:0,afs:0,cart:0,forn:0};a[w.pessoa].spend+=w.spend;a[w.pessoa].afs+=w.afs;a[w.pessoa].cart++;a[w.pessoa].forn+=w.forn;return a},{}));}
+    function metric(label,value){return `<article class="metric"><span>${label}</span><b>${value}</b></article>`}
+    function bar(label,value,max,display){return `<div class="bar"><span>${label}</span><div><i style="width:${Math.max(4,value/max*100)}%"></i></div><b>${display}</b></div>`}
+    function panel(title,body,cls=""){return `<section class="panel ${cls}"><h2>${title}</h2>${body}</section>`}
+    function exportCsv(){const rows=wallets.map(w=>[w.categoria,w.pessoa,w.tipo,w.spend,w.afs,w.forn,w.obs].join(";"));const blob=new Blob([["Categoria;Pessoa;Tipo;Spend;AFs;Fornecedores;Obs",...rows].join("\n")],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="team-os-carteiras.csv";a.click();URL.revokeObjectURL(a.href)}
+    function updateWallet(i,k,v){wallets[i][k]=["spend","afs","forn"].includes(k)?Number(v):v;render()}
+    function dashboard(){const loads=aggregate(),totalSpend=wallets.reduce((s,w)=>s+w.spend,0),totalAfs=wallets.reduce((s,w)=>s+w.afs,0),maxSpend=Math.max(...loads.map(l=>l.spend)),maxAfs=Math.max(...loads.map(l=>l.afs));const adherence=Math.round(assessments.filter(a=>a.atual>0).reduce((s,a)=>s+Math.min(1,a.atual/a.esperado),0)/assessments.filter(a=>a.atual>0).length*100);return `<section class="grid">${metric("Pessoas",people.length)}${metric("Carteiras",wallets.length)}${metric("Spend",money(totalSpend))}${metric("AFs",totalAfs)}${metric("Aderencia media",adherence+"%")} ${panel("Spend por pessoa",loads.map(l=>bar(l.pessoa,l.spend,maxSpend,money(l.spend))).join(""),"wide")} ${panel("AFs por pessoa",loads.map(l=>bar(l.pessoa,l.afs,maxAfs,String(l.afs))).join(""))} ${panel("Alertas executivos",loads.filter(l=>l.spend/totalSpend>.25||l.afs/totalAfs>.25).map(l=>`<div class="alert"><b>${l.pessoa}</b><span>Concentracao relevante de spend ou AFs. Revisar capacidade, sucessor e redistribuicao.</span></div>`).join(""))}</section>`}
+    function estrutura(){return `<section><div class="actions"><button onclick="render()">Salvar cenario</button><button onclick="wallets=wallets.map(w=>({...w,id:w.id+'-sim'}));render()">Duplicar baseline</button></div><div class="table"><table><thead><tr><th>Categoria</th><th>Pessoa</th><th>Tipo</th><th>Spend</th><th>AFs</th><th>Fornec.</th><th>Obs</th></tr></thead><tbody>${wallets.map((w,i)=>`<tr>${["categoria","pessoa","tipo","spend","afs","forn","obs"].map(k=>`<td><input value="${w[k]}" type="${typeof w[k]==="number"?"number":"text"}" onchange="updateWallet(${i},'${k}',this.value)"></td>`).join("")}</tr>`).join("")}</tbody></table></div></section>`}
+    function raioX(){const p=people.find(x=>x.id===selected),rows=people.map(p=>`<div class="heat-row"><b>${p.nome}</b>${skills.map(s=>{const a=assessments.find(x=>x.pessoa===p.id&&x.skill===s);return `<input value="${a.atual.toFixed(1)}" type="number" step=".1" min="0" max="5" onchange="a=this.value">`}).join("")}</div>`).join("");const skillBars=skills.map(s=>{const a=assessments.find(x=>x.pessoa===p.id&&x.skill===s);return bar(s,a.atual,5,`${a.atual.toFixed(1)} / esp. ${a.esperado}`)}).join("");const gaps=assessments.map(a=>({...a,nome:people.find(p=>p.id===a.pessoa).nome,gap:a.esperado-a.atual})).filter(a=>a.gap>0).sort((a,b)=>b.gap-a.gap).slice(0,10).map(g=>`<div class="alert"><b>${g.nome}</b><span>${g.skill}: gap ${g.gap.toFixed(1)}</span></div>`).join("");return `<section class="grid">${panel("Pessoa",`<select onchange="selected=this.value;render()">${people.map(x=>`<option value="${x.id}" ${x.id===selected?"selected":""}>${x.nome}</option>`).join("")}</select><h3>${p.nome}</h3><p>${p.cargo}</p><p>${p.cadeira}</p><p>SOMMOS: ${p.sommos} | Nota ${p.nota}</p>`)}${panel("Radar simplificado",skillBars,"wide")}${panel("Heatmap",`<div class="heat">${rows}</div>`,"full")}${panel("Maiores gaps",gaps,"full")}</section>`}
+    function candidatos(){return `<section class="grid">${panel("Cadastro de candidato",`<input value="Candidato exemplo"><input value="Analista Senior"><select><option>Mapeado</option><option selected>Em avaliacao</option><option>Entrevistado</option><option>Finalista</option><option>Aprovado</option><option>Reprovado</option><option>Banco de talentos</option></select><textarea>Fit cultural, comunicacao, autonomia, capacidade analitica e potencial de crescimento.</textarea>`)}${panel("Aderencia a vaga",skills.map((s,i)=>bar(s,i%3===0?3:4,4,i%3===0?"Gap":"Aderente")).join(""),"wide")}</section>`}
+    function config(){return `<section class="grid">${panel("Supabase",`<p>Projeto: wagner-performance-os</p><p>Schema isolado: team_os</p><p>Usar somente publishable key no front-end. Nunca commitar secret key.</p>`)}${panel("Comentarios",`<textarea>Hipotese: reduzir concentracao de AFs em limpeza e formalizar sucessor para carteiras criticas.</textarea>`,"wide")}</section>`}
+    function render(){const nav=[["dashboard","Dashboard"],["estrutura","Estrutura"],["raiox","Raio X do Time"],["candidatos","Avaliacao de Candidatos"],["config","Configuracoes"]].map(([id,label])=>`<button class="${tab===id?"active":""}" onclick="tab='${id}';render()">${label}</button>`).join("");const body={dashboard:dashboard(),estrutura:estrutura(),raiox:raioX(),candidatos:candidatos(),config:config()}[tab];document.getElementById("app").innerHTML=`<div class="shell"><aside><div class="brand">Team OS<span>Servicos Corporativos</span></div>${nav}<small>Schema Supabase: team_os</small></aside><main><header><div><p>Align Structure | Plano de 100 dias</p><h1>Servicos Corporativos Team OS</h1></div><button onclick="exportCsv()">Exportar CSV</button></header><div class="note">Dashboard executivo para estrutura, carteiras, competencias e candidatos. Backend Supabase previsto no schema isolado <b>team_os</b>.</div>${body}</main></div>`}
+    render();
+  </script>
+</body>
 </html>

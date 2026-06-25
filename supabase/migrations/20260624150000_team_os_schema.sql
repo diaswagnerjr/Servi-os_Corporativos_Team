@@ -1,16 +1,20 @@
 -- Servicos Corporativos Team OS
--- Target project: wagner-performance-os
--- Safety: run this preflight first and confirm no object conflict.
+-- Target Supabase project: wagner-performance-os
+-- Isolation rule: this migration creates only schema team_os and tables prefixed with team_os_.
+-- Preflight: run this SELECT before applying the CREATE statements and confirm there is no object conflict.
 select table_schema, table_name
 from information_schema.tables
 where table_schema not in ('pg_catalog', 'information_schema')
 order by table_schema, table_name;
 
 create schema if not exists team_os;
+
 create extension if not exists pgcrypto;
 
 create or replace function team_os.team_os_set_updated_at()
-returns trigger language plpgsql as $$
+returns trigger
+language plpgsql
+as $$
 begin
   new.updated_at = now();
   return new;
@@ -32,7 +36,7 @@ create table if not exists team_os.team_os_people (
   user_id uuid not null references auth.users(id) on delete cascade,
   role_id uuid references team_os.team_os_roles(id) on delete set null,
   name text not null,
-  current_role text not null,
+  current_role_name text not null,
   current_seat text,
   potential_seat text,
   career_moment text,
@@ -124,7 +128,7 @@ create table if not exists team_os.team_os_sommos_assessments (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   person_id uuid not null references team_os.team_os_people(id) on delete cascade,
-  status text not null check (status in ('Abaixo do esperado', 'Em desenvolvimento', 'Dentro do esperado', 'Acima do esperado', 'Referencia')),
+  status text not null check (status in ('Abaixo do esperado', 'Em desenvolvimento', 'Dentro do esperado', 'Acima do esperado', 'Referencia', 'Referência')),
   score numeric check (score between 0 and 5),
   career_moment text,
   development_plan text,
@@ -149,13 +153,14 @@ create table if not exists team_os.team_os_candidates (
   vacancy_id uuid references team_os.team_os_candidate_vacancies(id) on delete set null,
   name text not null,
   source_type text not null check (source_type in ('Interno', 'Externo')),
-  status text not null check (status in ('Mapeado', 'Em avaliacao', 'Entrevistado', 'Finalista', 'Aprovado', 'Reprovado', 'Banco de talentos')),
+  status text not null check (status in ('Mapeado', 'Em avaliacao', 'Em avaliação', 'Entrevistado', 'Finalista', 'Aprovado', 'Reprovado', 'Banco de talentos')),
   interview_notes text,
   cultural_fit_notes text,
   communication_notes text,
   autonomy_notes text,
   analytical_capacity_notes text,
   growth_potential_notes text,
+  final_decision text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -194,51 +199,86 @@ create table if not exists team_os.team_os_import_logs (
   updated_at timestamptz not null default now()
 );
 
-alter table team_os.team_os_roles enable row level security;
-alter table team_os.team_os_people enable row level security;
-alter table team_os.team_os_wallets enable row level security;
-alter table team_os.team_os_structure_baseline enable row level security;
-alter table team_os.team_os_structure_scenarios enable row level security;
-alter table team_os.team_os_competencies enable row level security;
-alter table team_os.team_os_expected_competency_matrix enable row level security;
-alter table team_os.team_os_people_assessments enable row level security;
-alter table team_os.team_os_sommos_assessments enable row level security;
-alter table team_os.team_os_candidate_vacancies enable row level security;
-alter table team_os.team_os_candidates enable row level security;
-alter table team_os.team_os_candidate_assessments enable row level security;
-alter table team_os.team_os_comments enable row level security;
-alter table team_os.team_os_import_logs enable row level security;
+do $$
+declare
+  target_table text;
+begin
+  foreach target_table in array array[
+    'team_os_roles',
+    'team_os_people',
+    'team_os_wallets',
+    'team_os_structure_baseline',
+    'team_os_structure_scenarios',
+    'team_os_competencies',
+    'team_os_expected_competency_matrix',
+    'team_os_people_assessments',
+    'team_os_sommos_assessments',
+    'team_os_candidate_vacancies',
+    'team_os_candidates',
+    'team_os_candidate_assessments',
+    'team_os_comments',
+    'team_os_import_logs'
+  ]
+  loop
+    execute format('alter table team_os.%I enable row level security', target_table);
+    execute format('drop trigger if exists %I on team_os.%I', target_table || '_updated_at', target_table);
+    execute format('create trigger %I before update on team_os.%I for each row execute function team_os.team_os_set_updated_at()', target_table || '_updated_at', target_table);
+  end loop;
+end $$;
 
-grant usage on schema team_os to authenticated;
+grant usage on schema team_os to anon, authenticated;
+grant select on team_os.team_os_competencies to anon, authenticated;
 grant select, insert, update, delete on all tables in schema team_os to authenticated;
 alter default privileges in schema team_os grant select, insert, update, delete on tables to authenticated;
 
-create policy "competencies read" on team_os.team_os_competencies for select to authenticated using (true);
+create policy "team_os_competencies_read_all_authenticated"
+on team_os.team_os_competencies
+for select
+to anon, authenticated
+using (true);
 
-create policy "roles own" on team_os.team_os_roles for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "people own" on team_os.team_os_people for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "wallets own" on team_os.team_os_wallets for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "baseline own" on team_os.team_os_structure_baseline for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "scenarios own" on team_os.team_os_structure_scenarios for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "matrix own" on team_os.team_os_expected_competency_matrix for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "assessments own" on team_os.team_os_people_assessments for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "sommos own" on team_os.team_os_sommos_assessments for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "vacancies own" on team_os.team_os_candidate_vacancies for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "candidates own" on team_os.team_os_candidates for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "candidate assessments own" on team_os.team_os_candidate_assessments for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "comments own" on team_os.team_os_comments for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "import logs own" on team_os.team_os_import_logs for all to authenticated using ((select auth.uid()) = user_id or user_id is null) with check ((select auth.uid()) = user_id or user_id is null);
+do $$
+declare
+  target_table text;
+begin
+  foreach target_table in array array[
+    'team_os_roles',
+    'team_os_people',
+    'team_os_wallets',
+    'team_os_structure_baseline',
+    'team_os_structure_scenarios',
+    'team_os_expected_competency_matrix',
+    'team_os_people_assessments',
+    'team_os_sommos_assessments',
+    'team_os_candidate_vacancies',
+    'team_os_candidates',
+    'team_os_candidate_assessments',
+    'team_os_comments',
+    'team_os_import_logs'
+  ]
+  loop
+    execute format('create policy %I on team_os.%I for select to authenticated using ((select auth.uid()) = user_id)', target_table || '_select_own', target_table);
+    execute format('create policy %I on team_os.%I for insert to authenticated with check ((select auth.uid()) = user_id or user_id is null)', target_table || '_insert_own', target_table);
+    execute format('create policy %I on team_os.%I for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id)', target_table || '_update_own', target_table);
+    execute format('create policy %I on team_os.%I for delete to authenticated using ((select auth.uid()) = user_id)', target_table || '_delete_own', target_table);
+  end loop;
+end $$;
 
-insert into team_os.team_os_competencies (slug, name, group_name, description) values
-('negociacao','Negociacao','Hard Skill','Processo de interacao para atingir acordos sustentaveis.'),
-('fornecedores_stakeholders','Gestao de Fornecedores e Stakeholders','Hard Skill','Relacionamento, qualificacao, performance, SLAs e conectividade.'),
-('strategic_sourcing','Strategic Sourcing','Hard Skill','Analise de gastos, mercado, negociacao e contratacao.'),
-('ferramentas','Ferramentas, sistemas e idiomas','Hard Skill','SAP, plataformas de compras, dados, Office e idiomas.'),
-('mercado_categoria','Analise de Mercado, Funcao Suprimentos, Estrategia de Categoria e Sustentabilidade','Hard Skill','Leitura de mercado, drivers, req-to-pay, valor e sustentabilidade.'),
-('flexibilidade','Flexibilidade e Resiliencia','Soft Skill','Adaptacao e continuidade de entrega diante de mudancas.'),
-('comunicacao','Comunicacao de alto impacto','Soft Skill','Mensagens claras, concisas e influentes.'),
-('autonomia','Autonomia, Protagonismo & Solucao de Problemas','Soft Skill','Responsabilidade, riscos, problemas e decisoes.'),
-('organizacao','Organizacao, priorizacao, foco e senso de urgencia','Soft Skill','Organizacao, planejamento, priorizacao e execucao.'),
-('risco_decisao','Analise de Risco e Tomada de Decisao','Soft Skill','Identificacao, avaliacao e mitigacao de riscos.'),
-('equipe','Trabalho em Equipe/Espirito Coletivo','Soft Skill','Colaboracao e integracao de conhecimento.')
-on conflict (slug) do update set name = excluded.name, group_name = excluded.group_name, description = excluded.description, updated_at = now();
+insert into team_os.team_os_competencies (slug, name, group_name, description)
+values
+  ('negociacao', 'Negociacao', 'Hard Skill', 'Processo de interacao para atingir acordos sustentaveis.'),
+  ('fornecedores_stakeholders', 'Gestao de Fornecedores e Stakeholders', 'Hard Skill', 'Relacionamento, qualificacao, performance, SLAs e conectividade.'),
+  ('strategic_sourcing', 'Strategic Sourcing', 'Hard Skill', 'Analise de gastos, mercado, negociacao, contratacao e melhoria continua.'),
+  ('ferramentas', 'Ferramentas, sistemas e idiomas', 'Hard Skill', 'SAP, plataformas de compras, dados, Office e idiomas aplicaveis.'),
+  ('mercado_categoria', 'Analise de Mercado, Funcao Suprimentos, Estrategia de Categoria e Sustentabilidade', 'Hard Skill', 'Leitura de mercado, drivers, req-to-pay, valor e sustentabilidade.'),
+  ('flexibilidade', 'Flexibilidade e Resiliencia', 'Soft Skill', 'Adaptacao e continuidade de entrega diante de mudancas.'),
+  ('comunicacao', 'Comunicacao de alto impacto', 'Soft Skill', 'Mensagens claras, concisas e influentes.'),
+  ('autonomia', 'Autonomia, Protagonismo & Solucao de Problemas', 'Soft Skill', 'Responsabilidade, riscos, problemas e decisoes.'),
+  ('organizacao', 'Organizacao, priorizacao, foco e senso de urgencia', 'Soft Skill', 'Organizacao, planejamento, priorizacao e execucao.'),
+  ('risco_decisao', 'Analise de Risco e Tomada de Decisao', 'Soft Skill', 'Identificacao, avaliacao e mitigacao de riscos.'),
+  ('equipe', 'Trabalho em Equipe/Espirito Coletivo', 'Soft Skill', 'Colaboracao, integracao de conhecimento e resultado comum.')
+on conflict (slug) do update
+set name = excluded.name,
+    group_name = excluded.group_name,
+    description = excluded.description,
+    updated_at = now();
